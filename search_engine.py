@@ -13,23 +13,18 @@ class SearchEngine:
         ranks = {}
         for word in query_words:
             word = self.indexer.parse_word(word)
-            if word in self.indexer.word_index:
-                for page_id in self.indexer.word_index[word].keys():
-                    if page_id not in ranks:
-                        ranks[page_id] = 0
-                    ranks[page_id] += self.calculate_rank(page_id, word)
-        # Rank search results based on relevance
-        # ranks = {}
-        # for page_id in search_results:
-        #     rank = 0
-        #     for word in query_words:
-        #         word = self.indexer.parse_word(word)
-        #         rank += self.calculate_tf_idf(page_id, word)
-        #     ranks[page_id] = rank
-        ranks = sorted(ranks.items(), key=lambda rank_tuple: rank_tuple[1], reverse=True)
+            if word not in self.indexer.word_index:
+                continue
+            for page_id in self.indexer.word_index[word].keys():
+                if page_id not in ranks:
+                    ranks[page_id] = 0
+                ranks[page_id] += self.calculate_rank(page_id, word)
+
         if not ranks:
             print("No results found.")
             return ranks
+
+        ranks = sorted(ranks.items(), key=lambda rank_tuple: rank_tuple[1], reverse=True)
 
         print("Ranked Pages:")
         for i, rank in enumerate(ranks):
@@ -52,3 +47,5 @@ if __name__ == "__main__":
     indexer.load_index()
     engine = SearchEngine(indexer)
     print(engine.search("steve martin"))
+    print(engine.search("albert einstein"))
+    print(engine.search("i am looking for albert einstein"))
