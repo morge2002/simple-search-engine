@@ -34,7 +34,7 @@ class SearchEngine:
 
         print(f"Top 10 results for '{query}':")
         for i, rank in enumerate(ranks):
-            print(f"{i + 1} (Rank: {rank[1]}): {self.indexer.id_to_url[rank[0]]}")
+            print(f"{i + 1} (Rank: {rank[1]:.4f}): {self.indexer.id_to_url[rank[0]]}")
             if i >= 10:
                 break
         return ranks

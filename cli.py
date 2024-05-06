@@ -1,9 +1,11 @@
 import json
+import os
 import time
 import requests
 
 import typer
 import progressbar
+from rich import print
 
 from crawler import Crawler
 from indexer import Indexer
@@ -17,8 +19,10 @@ indexer = Indexer()
 crawler = Crawler(website_url, indexer=indexer)
 search_engine = SearchEngine(indexer)
 
+index_loaded = False
 
-@app.command()
+
+@app.command(name="build")
 def build():
     bar = progressbar.ProgressBar(maxval=progressbar.UnknownLength)
     indexer.wipe_index()
@@ -27,9 +31,10 @@ def build():
     indexer.save_index()
 
 
-@app.command()
+@app.command(name="load")
 def load():
     indexer.load_index()
+    index_loaded = True
     print("Index loaded.")
 
 
@@ -48,17 +53,29 @@ def print_index(search_word: str):
     print(json.dumps(index, indent=2))
 
 
-@app.command()
+@app.command(name="find")
 def find(search_phrase: str):
-    print(search_phrase)
+    print(f"Searching for {search_phrase}:")
     search_engine.search(search_phrase)
-    print("Search complete.\n")
+    print("Search complete.")
 
 
 def main():
+    commands = ", ".join([command.name for command in app.registered_commands])
+    print("\n[bold underline green]Welcome to the search engine CLI![/bold underline green]")
     while True:
-        typer.echo("Enter a command (build, load, print, find), or 'exit' to quit:")
-        time.sleep(0.5)
+        time.sleep(0.1)
+        print(f"\n[green]Enter a command ({commands}), or 'exit' to quit:[/green]")
+        print(
+            f"[blue]"
+            f"INFO: "
+            f"Index present: [underline]{os.path.exists(indexer.index_file_path)}[/underline], "
+            f"Index loaded: [underline]{index_loaded}[/underline], "
+            f"Website: {website_url}, "
+            f"Index size: [underline]{len(indexer.page_index)}[/underline] pages)"
+            f"[/blue]"
+        )
+
         command = input("> ").strip()
 
         if command == "exit":
