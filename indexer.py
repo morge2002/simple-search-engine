@@ -4,6 +4,11 @@ import string
 
 
 class Indexer:
+    """
+    A class to index the text content of web pages. The index is stored as a dictionary of word frequencies to pages.
+    Each page has an ID used to reference the page in the index.
+    """
+
     def __init__(self, index_file_path='index.json'):
         # Index of word frequencies to URLs
         self.word_index = {}
@@ -15,6 +20,7 @@ class Indexer:
         self.current_page_id = 0
 
     def index_page(self, url, text):
+        """Update the index with the word frequency of a page."""
         if url in self.url_to_id:
             page_id = self.url_to_id[url]
         else:
@@ -30,9 +36,11 @@ class Indexer:
         # self.save_index()
 
     def parse_word(self, word):
+        """Remove punctuation and convert to lowercase."""
         return word.translate(self.translation_table).lower()
 
     def add_word(self, word, page_id):
+        """Add a word to the index."""
         if page_id not in self.page_index:
             self.page_index[page_id] = {}
         if word not in self.word_index:
@@ -47,12 +55,13 @@ class Indexer:
         self.word_index[word][page_id] += 1
 
     def get_new_page_id(self):
+        """Get a new page ID."""
         page_id = self.current_page_id
         self.current_page_id += 1
         return page_id
 
     def load_index(self):
-        # Load the index from a file if it exists
+        """Load the index from a file if it exists."""
         if not os.path.exists(self.index_file_path):
             print("No index file found")
             return
@@ -72,6 +81,7 @@ class Indexer:
                 self.id_to_url = {}
 
     def save_index(self):
+        """Save the index to a file."""
         with open(self.index_file_path, 'w') as f:
             index = {
                 'word_index': self.word_index,
@@ -82,6 +92,7 @@ class Indexer:
             json.dump(index, f)
 
     def wipe_index(self):
+        """Wipe the index."""
         self.word_index = {}
         self.page_index = {}
         self.url_to_id = {}

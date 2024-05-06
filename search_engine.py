@@ -4,10 +4,19 @@ from indexer import Indexer
 
 
 class SearchEngine:
-    def __init__(self, indexer: Indexer):
-        self.indexer = indexer
+    """
+    A class to perform search queries on an inverted index stored and created by the Indexer object. Search queries
+    are ranked by their each word's frequency in a page multiplied by the tf-idf score of the word in the query.
+    """
 
-    def search(self, query):
+    def __init__(self, indexer_object: Indexer):
+        self.indexer = indexer_object
+
+    def search(self, query: str):
+        """
+        Perform a search query on the index.
+        :param query: Query string
+        """
         query_words = query.split()
         ranks = {}
         # Go through each word, find the rank for each page and sum them
@@ -16,15 +25,12 @@ class SearchEngine:
 
             if word not in self.indexer.word_index:
                 continue
-
-            tf_idf = self.query_word_tf_idf(word, query_words)
-
             # Calculate rank for each page for the word
             for page_id in self.indexer.word_index[word].keys():
                 if page_id not in ranks:
                     ranks[page_id] = 0
-                # Rank is multiplied by the tf_idf score of the word in the query
-                ranks[page_id] += self.calculate_rank(page_id, word) * tf_idf
+
+                ranks[page_id] += self.calculate_rank(page_id, word, query_words)
 
         if not ranks:
             print("No results found.")
@@ -34,17 +40,21 @@ class SearchEngine:
 
         print(f"Top 10 results for '{query}':")
         for i, rank in enumerate(ranks):
-            print(f"{i + 1} (Rank: {rank[1]:.4f}): {self.indexer.id_to_url[rank[0]]}")
             if i >= 10:
                 break
+            print(f"{i + 1} (Rank: {rank[1]:.4f}): {self.indexer.id_to_url[rank[0]]}")
         return ranks
 
-    def calculate_rank(self, page_id, word):
+    def calculate_rank(self, page_id, word, query_words):
+        """Rank is calculated by the frequency of the word in the page by its tf-idf."""
         if word not in self.indexer.page_index[page_id]:
             return 0
-        return self.indexer.word_index[word][page_id]
+
+        tf_idf = self.query_word_tf_idf(word, query_words)
+        return self.indexer.word_index[word][page_id] * tf_idf
 
     def query_word_tf_idf(self, word, query_words):
+        """Calculate the tf-idf score of a word in a query."""
         tf = query_words.count(word) / len(query_words)
         idf = math.log(len(self.indexer.url_to_id.keys()) / len(self.indexer.word_index[word].keys()))
         return tf * idf

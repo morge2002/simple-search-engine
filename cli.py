@@ -1,10 +1,9 @@
 import json
 import os
 import time
-import requests
 
+import requests
 import typer
-import progressbar
 from rich import print
 
 from crawler import Crawler
@@ -24,7 +23,6 @@ index_loaded = False
 
 @app.command(name="build")
 def build():
-    bar = progressbar.ProgressBar(maxval=progressbar.UnknownLength)
     indexer.wipe_index()
     crawler.reset_crawler()
     crawler.crawl(website_url)
@@ -34,6 +32,7 @@ def build():
 @app.command(name="load")
 def load():
     indexer.load_index()
+    global index_loaded
     index_loaded = True
     print("Index loaded.")
 
@@ -55,7 +54,6 @@ def print_index(search_word: str):
 
 @app.command(name="find")
 def find(search_phrase: str):
-    print(f"Searching for {search_phrase}:")
     search_engine.search(search_phrase)
     print("Search complete.")
 

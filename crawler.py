@@ -9,6 +9,11 @@ from indexer import Indexer
 
 
 class Crawler:
+    """
+    A class to crawl a website and index its content. The crawler will recursively follow links on the website and index
+    the text content of each page. The crawler will observe a politeness window to avoid overwhelming the website with
+    requests.
+    """
     webpages = set()
     requested_urls = []
 
@@ -24,7 +29,8 @@ class Crawler:
         self.fetched_pages = 0
 
     def fetch_page_content(self, url) -> bytes | None:
-        # Ensure politeness window is observed
+        """Fetch the content of a web page."""
+        # Ensure the politeness window is observed
         current_time = time.time()
         time_since_last_request = current_time - self.last_request_time
         if time_since_last_request < self.politeness_window:
@@ -43,28 +49,29 @@ class Crawler:
         return response.content
 
     def __crawl(self, url, bar):
+        """Recursively crawl a website."""
         bar.update()
         if self.fetched_pages >= self.max_pages:
             print(f"Reached maximum number of pages: {self.max_pages}")
             bar.update()
             return
-        # print(f"{url}: Crawling...")
+
         page_content = self.fetch_page_content(url)
         if not page_content:
-            #             print(f"{url}: No content found or skipped")
             bar.update()
             return
+
         # Crawl the web page
         soup = BeautifulSoup(page_content, 'html.parser')
+
         # Extract text content from HTML
         text = self.extract_texts(soup)
         if not text:
-            #             print(f"{url}: No text content found or skipped")
             bar.update()
             return
+
         # Index the text content
         self.indexer.index_page(url, text)
-        # print(f"{url}: Indexed")
         # Extract links from HTML
         links: list = self.get_page_links(soup)
         links: list = self.filter_and_format_links(links)
@@ -72,7 +79,6 @@ class Crawler:
         self.webpages.update(links)
         # print(f"{url}: Found {len(links)} unseen links")
         if len(links):
-            #             print(f"{url}: Crawling {len(links)} links...")
             bar.max = len(self.webpages)
 
         bar.next()
@@ -82,9 +88,8 @@ class Crawler:
             bar.update()
             self.__crawl(link, bar)
 
-    #         print(f"{url}: Finished crawling.")
-
     def crawl(self, website_url=None):
+        """Crawl a website showing a progress bar which updates as new pages are found and crawled."""
         if website_url is None:
             website_url = self.website_url
         with Bar('Crawling', suffix='%(index)d / %(max)d , %(elapsed_td)s', max=10) as bar:
@@ -92,11 +97,12 @@ class Crawler:
 
     @staticmethod
     def get_page_links(soup) -> list:
-        # Extract links from HTML
+        """Extract links from BeautifulSoup soup"""
         links = [link.get('href') for link in soup.find_all('a')]
         return links
 
     def filter_and_format_links(self, links) -> list:
+        """Find new links and add the website URL to relative links."""
         filtered_links = []
         links = set(links)
         for link in links:
@@ -114,11 +120,12 @@ class Crawler:
 
     @staticmethod
     def extract_texts(soup):
-        # Extract text content from HTML
+        """Extract text content from BeautifulSoup soup"""
         text = soup.get_text()
         return text
 
     def reset_crawler(self):
+        """Reset the crawler to its initial state."""
         self.webpages = set()
         self.requested_urls = []
         self.fetched_pages = 0
@@ -129,7 +136,6 @@ if __name__ == "__main__":
     crawler = Crawler("https://quotes.toscrape.com/")
     crawler.crawl("https://quotes.toscrape.com/")
     crawler.indexer.save_index()
-    # bar.finish()
     print(crawler.webpages)
     print(crawler.requested_urls)
     print(crawler.indexer.word_index)
