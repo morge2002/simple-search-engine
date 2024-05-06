@@ -15,14 +15,14 @@ a page multiplied by the tf-idf score of the word in the query.
 - `crawler.py`: Contains the Crawler class which is responsible for crawling a website and indexing its content.
 - `indexer.py`: Contains the Indexer class which is responsible for indexing the text content of web pages.
 - `search_engine.py`: Contains the SearchEngine class which performs search queries on the index.
-- `cli.py`: Contains the command line interface for the project.
+- `search.py`: Contains the command line interface for the project.
 
 ## Usage
 
 To use this project, you must the command line interface.
 
 ```bash
-python3 cli.py
+python3 search.py
 ```
 
 First, build the index by running the `build` command. This will crawl the website and index its content. The index is
@@ -71,7 +71,7 @@ pip install -r requirements.txt
 3. Run the CLI
 
 ```bash
-python3 cli.py
+python3 search.py
 ```
 
 ## Note
