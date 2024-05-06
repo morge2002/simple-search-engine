@@ -9,10 +9,11 @@ class SearchEngine:
 
     def search(self, query):
         query_words = query.split()
-        search_results = []
         ranks = {}
+        # Go through each word, find the rank for each page and sum them
         for word in query_words:
             word = self.indexer.parse_word(word)
+
             if word not in self.indexer.word_index:
                 continue
 
@@ -31,18 +32,16 @@ class SearchEngine:
 
         ranks = sorted(ranks.items(), key=lambda rank_tuple: rank_tuple[1], reverse=True)
 
-        print("Ranked Pages:")
+        print(f"Top 10 results for '{query}':")
         for i, rank in enumerate(ranks):
-            print(f"{i+1} (Freq: {rank[1]}): {self.indexer.id_to_url[rank[0]]}")
+            print(f"{i + 1} (Rank: {rank[1]}): {self.indexer.id_to_url[rank[0]]}")
+            if i >= 10:
+                break
         return ranks
 
     def calculate_rank(self, page_id, word):
         if word not in self.indexer.page_index[page_id]:
             return 0
-        # tf = self.indexer.word_index[word][page_id] / sum(self.indexer.page_index[page_id].values())
-        # idf = math.log(len(self.indexer.url_to_id.keys()) / len(self.indexer.word_index[word].keys()))
-        # tf_idf = tf * idf
-        # return tf_idf
         return self.indexer.word_index[word][page_id]
 
     def query_word_tf_idf(self, word, query_words):

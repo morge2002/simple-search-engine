@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 from progress.bar import Bar
+
 from indexer import Indexer
 
 
@@ -50,7 +51,7 @@ class Crawler:
         # print(f"{url}: Crawling...")
         page_content = self.fetch_page_content(url)
         if not page_content:
-#             print(f"{url}: No content found or skipped")
+            #             print(f"{url}: No content found or skipped")
             bar.update()
             return
         # Crawl the web page
@@ -58,7 +59,7 @@ class Crawler:
         # Extract text content from HTML
         text = self.extract_texts(soup)
         if not text:
-#             print(f"{url}: No text content found or skipped")
+            #             print(f"{url}: No text content found or skipped")
             bar.update()
             return
         # Index the text content
@@ -71,7 +72,7 @@ class Crawler:
         self.webpages.update(links)
         # print(f"{url}: Found {len(links)} unseen links")
         if len(links):
-#             print(f"{url}: Crawling {len(links)} links...")
+            #             print(f"{url}: Crawling {len(links)} links...")
             bar.max = len(self.webpages)
 
         bar.next()
@@ -81,7 +82,7 @@ class Crawler:
             bar.update()
             self.__crawl(link, bar)
 
-#         print(f"{url}: Finished crawling.")
+    #         print(f"{url}: Finished crawling.")
 
     def crawl(self, website_url=None):
         if website_url is None:
