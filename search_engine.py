@@ -48,5 +48,7 @@ class SearchEngine:
 
 if __name__ == "__main__":
     # Crawling |################################| 214 / 214 , 0:22:52
-    engine = SearchEngine(Indexer())
+    indexer = Indexer()
+    indexer.load_index()
+    engine = SearchEngine(indexer)
     print(engine.search("steve martin"))
