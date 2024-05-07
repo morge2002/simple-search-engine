@@ -49,9 +49,15 @@ class SearchEngine:
         """Rank is calculated by the frequency of the word in the page by its tf-idf."""
         if word not in self.indexer.page_index[page_id]:
             return 0
-
-        tf_idf = self.query_word_tf_idf(word, query_words)
-        return self.indexer.word_index[word][page_id] * tf_idf
+        k1 = 1.5
+        b = 0.75
+        idf = math.log(len(self.indexer.url_to_id.keys()) / len(self.indexer.word_index[word].keys()))
+        tf = self.indexer.page_index[page_id][word] / len(self.indexer.page_index[page_id].keys())
+        average_page_length = sum([len(self.indexer.page_index[page].keys()) for page in self.indexer.page_index.keys()]) / len(self.indexer.page_index.keys())
+        BM25 = idf * ((tf * (k1 + 1)) / ((tf + k1) * (1 - b + b * (len(self.indexer.page_index[page_id].keys()) / average_page_length))))
+        return BM25
+        # tf_idf = self.query_word_tf_idf(word, query_words)
+        # return self.indexer.word_index[word][page_id] * tf_idf
 
     def query_word_tf_idf(self, word, query_words):
         """Calculate the tf-idf score of a word in a query."""
