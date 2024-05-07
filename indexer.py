@@ -11,9 +11,13 @@ class Indexer:
 
     def __init__(self, index_file_path='index.json'):
         # Index of word frequencies to URLs
+        # Structure: {word: {page_id: frequency}, ...}
         self.word_index = {}
+        # Structure: {page_id: {word: frequency}, ...}
         self.page_index = {}
+        # Structure: {url: page_id, ...}
         self.url_to_id = {}
+        # Structure: {page_id: url, ...}
         self.id_to_url = {}
         self.translation_table = str.maketrans('', '', string.punctuation + '“”')
         self.index_file_path = index_file_path
