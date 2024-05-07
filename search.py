@@ -5,6 +5,7 @@ import time
 import requests
 import typer
 from rich import print
+import tabulate
 
 from crawler import Crawler
 from indexer import Indexer
@@ -48,13 +49,27 @@ def print_index(search_word: str):
     for page_id, value in indexer.word_index[search_word].items():
         index[indexer.id_to_url[page_id]] = value
 
+    output = {"Page": [], "Word Frequency": []}
+    for page_id, value in indexer.word_index[search_word].items():
+        output["Page"].append(indexer.id_to_url[page_id])
+        output["Word Frequency"].append(value)
+
     print(f"Word '{search_word}' index:")
-    print(json.dumps(index, indent=2))
+    print(tabulate.tabulate(output, headers="keys", showindex="always", tablefmt="simple_grid"))
 
 
 @app.command(name="find")
 def find(search_phrase: str):
-    search_engine.search(search_phrase)
+    results = search_engine.search(search_phrase)
+
+    output = {"Page": [], "Rank": []}
+    for i, rank in enumerate(results):
+        if i >= 10:
+            break
+        output["Page"].append(indexer.id_to_url[rank[0]])
+        output["Rank"].append(rank[1])
+    print(f"Top 10 results for '{search_phrase}':")
+    print(tabulate.tabulate(output, headers="keys", showindex="always", tablefmt="simple_grid"))
     print("Search complete.")
 
 

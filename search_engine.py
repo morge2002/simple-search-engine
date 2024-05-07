@@ -37,12 +37,6 @@ class SearchEngine:
             return ranks
 
         ranks = sorted(ranks.items(), key=lambda rank_tuple: rank_tuple[1], reverse=True)
-
-        print(f"Top 10 results for '{query}':")
-        for i, rank in enumerate(ranks):
-            if i >= 10:
-                break
-            print(f"{i + 1} (Rank: {rank[1]:.4f}): {self.indexer.id_to_url[rank[0]]}")
         return ranks
 
     def calculate_rank(self, page_id, word, query_words):
