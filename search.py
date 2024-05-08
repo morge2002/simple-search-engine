@@ -1,11 +1,10 @@
-import json
 import os
 import time
 
 import requests
+import tabulate
 import typer
 from rich import print
-import tabulate
 
 from crawler import Crawler
 from indexer import Indexer
@@ -25,7 +24,13 @@ index_loaded = False
 @app.command(name="build")
 def build():
     indexer.wipe_index()
+    global index_loaded
+    index_loaded = False
     crawler.reset_crawler()
+    print(
+        "Building index. The number of pages to crawl will increase as more pages are found. This is shown in the "
+        "progress bar."
+    )
     crawler.crawl(website_url)
     indexer.save_index()
 
@@ -62,12 +67,14 @@ def print_index(search_word: str):
 def find(search_phrase: str):
     results = search_engine.search(search_phrase)
 
-    output = {"Page": [], "Rank": []}
-    for i, rank in enumerate(results):
-        if i >= 10:
-            break
-        output["Page"].append(indexer.id_to_url[rank[0]])
-        output["Rank"].append(rank[1])
+    output = {"Page": [], "Match Type (phrase, all_words, other)": [], "Score": [], "Matched Words": []}
+    for i, page_id in enumerate(results):
+        output["Page"].append(indexer.id_to_url[page_id])
+        output["Match Type (phrase, all_words, other)"].append(results[page_id]["match_type"])
+        # TODO: Remove the following line and the next line
+        output["Score"].append(results[page_id]["score"])
+        output["Matched Words"].append(len(results[page_id]["all_words"]))
+
     print(f"Top 10 results for '{search_phrase}':")
     print(tabulate.tabulate(output, headers="keys", showindex="always", tablefmt="simple_grid"))
     print("Search complete.")
@@ -85,7 +92,7 @@ def main():
             f"Index present: [underline]{os.path.exists(indexer.index_file_path)}[/underline], "
             f"Index loaded: [underline]{index_loaded}[/underline], "
             f"Website: {website_url}, "
-            f"Index size: [underline]{len(indexer.page_index)}[/underline] pages)"
+            f"Index size: [underline]{len(indexer.id_to_url)}[/underline] pages)"
             f"[/blue]"
         )
 
