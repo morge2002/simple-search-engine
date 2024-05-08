@@ -9,17 +9,15 @@ class Indexer:
     Each page has an ID used to reference the page in the index.
     """
 
-    def __init__(self, index_file_path='index.json'):
+    def __init__(self, index_file_path="index.json"):
         # Index of word frequencies to URLs
-        # Structure: {word: {page_id: frequency}, ...}
+        # Structure: {word: {page_id: [pos_1, pos_2, ...]}, ...}
         self.word_index = {}
-        # Structure: {page_id: {word: frequency}, ...}
-        self.page_index = {}
         # Structure: {url: page_id, ...}
         self.url_to_id = {}
         # Structure: {page_id: url, ...}
         self.id_to_url = {}
-        self.translation_table = str.maketrans('', '', string.punctuation + '“”')
+        self.translation_table = str.maketrans("", "", string.punctuation + "“”")
         self.index_file_path = index_file_path
         self.current_page_id = 0
 
@@ -34,29 +32,24 @@ class Indexer:
         # Define a translation table to remove punctuation
         # Index the text content of a page
         words = text.split()
-        for word in words:
+        for position, word in enumerate(words):
             word = self.parse_word(word)
-            self.add_word(word, page_id)
+            self.add_word(word, page_id, position)
         # self.save_index()
 
     def parse_word(self, word):
         """Remove punctuation and convert to lowercase."""
         return word.translate(self.translation_table).lower()
 
-    def add_word(self, word, page_id):
+    def add_word(self, word, page_id, position):
         """Add a word to the index."""
-        if page_id not in self.page_index:
-            self.page_index[page_id] = {}
         if word not in self.word_index:
             self.word_index[word] = {}
 
-        if word not in self.page_index[page_id]:
-            self.page_index[page_id][word] = 0
         if page_id not in self.word_index[word]:
-            self.word_index[word][page_id] = 0
+            self.word_index[word][page_id] = []
 
-        self.page_index[page_id][word] += 1
-        self.word_index[word][page_id] += 1
+        self.word_index[word][page_id].append(position)
 
     def get_new_page_id(self):
         """Get a new page ID."""
@@ -70,35 +63,31 @@ class Indexer:
             print("No index file found")
             return
 
-        with open(self.index_file_path, 'r') as f:
+        with open(self.index_file_path, "r") as f:
             index = json.load(f)
             try:
-                self.word_index = index['word_index']
-                self.page_index = index['page_index']
-                self.url_to_id = index['url_to_id']
-                self.id_to_url = index['id_to_url']
+                self.word_index = index["word_index"]
+                self.url_to_id = index["url_to_id"]
+                self.id_to_url = index["id_to_url"]
             except KeyError:
                 print("Couldn't load index file correctly: Index reset.")
                 self.word_index = {}
-                self.page_index = {}
                 self.url_to_id = {}
                 self.id_to_url = {}
 
     def save_index(self):
         """Save the index to a file."""
-        with open(self.index_file_path, 'w') as f:
+        with open(self.index_file_path, "w") as f:
             index = {
-                'word_index': self.word_index,
-                'page_index': self.page_index,
-                'url_to_id': self.url_to_id,
-                'id_to_url': self.id_to_url
+                "word_index": self.word_index,
+                "url_to_id": self.url_to_id,
+                "id_to_url": self.id_to_url,
             }
             json.dump(index, f)
 
     def wipe_index(self):
         """Wipe the index."""
         self.word_index = {}
-        self.page_index = {}
         self.url_to_id = {}
         self.id_to_url = {}
         self.current_page_id = 0
