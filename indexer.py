@@ -22,7 +22,7 @@ class Indexer:
         self.current_page_id = 0
 
     def index_page(self, url, text):
-        """Update the index with the word frequency of a page."""
+        """Update the index with the positions of each word of the page."""
         if url in self.url_to_id:
             page_id = self.url_to_id[url]
         else:

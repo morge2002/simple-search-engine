@@ -4,7 +4,8 @@ from indexer import Indexer
 class SearchEngine:
     """
     A class to perform search queries on an inverted index stored and created by the Indexer object. Search queries
-    are ranked by their each word's frequency in a page multiplied by the tf-idf score of the word in the query.
+    are ranked by whether they contain the exact query phrase, the number of unique query words they contain and their
+    query word frequency.
     """
 
     def __init__(self, indexer_object: Indexer):

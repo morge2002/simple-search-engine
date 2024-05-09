@@ -23,6 +23,7 @@ index_loaded = False
 
 @app.command(name="build")
 def build():
+    """Wipe the index and crawl the website to rebuild the index."""
     indexer.wipe_index()
     global index_loaded
     index_loaded = False
@@ -37,6 +38,7 @@ def build():
 
 @app.command(name="load")
 def load():
+    """Load the index from the file."""
     indexer.load_index()
     global index_loaded
     index_loaded = True
@@ -45,6 +47,7 @@ def load():
 
 @app.command(name="print")
 def print_index(search_word: str):
+    """Print the index for a specific word."""
     search_word = indexer.parse_word(search_word)
 
     if search_word not in indexer.word_index:
@@ -54,10 +57,10 @@ def print_index(search_word: str):
     for page_id, value in indexer.word_index[search_word].items():
         index[indexer.id_to_url[page_id]] = value
 
-    output = {"Page": [], "Word Frequency": []}
+    output = {"Page": [], "Word Positions": []}
     for page_id, value in indexer.word_index[search_word].items():
         output["Page"].append(indexer.id_to_url[page_id])
-        output["Word Frequency"].append(value)
+        output["Word Positions"].append(value)
 
     print(f"Word '{search_word}' index:")
     print(tabulate.tabulate(output, headers="keys", showindex="always", tablefmt="simple_grid"))
@@ -65,6 +68,7 @@ def print_index(search_word: str):
 
 @app.command(name="find")
 def find(search_phrase: str):
+    """Search the index for a specific phrase."""
     results = search_engine.search(search_phrase)
 
     output = {"Page": [], "Match Type (phrase, all_words, other)": [], "Score": [], "Matched Words": []}
@@ -81,6 +85,7 @@ def find(search_phrase: str):
 
 
 def main():
+    """Main function to run the CLI."""
     commands = ", ".join([command.name for command in app.registered_commands])
     print("\n[bold underline green]Welcome to the search engine CLI![/bold underline green]")
     while True:

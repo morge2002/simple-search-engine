@@ -4,11 +4,11 @@ This project is a simple web crawler and search engine built in Python. It uses 
 and extract text content from web pages, and the requests library to fetch web pages. The crawler follows links on each
 page to discover new pages, and it observes a politeness window to avoid overwhelming the website with requests.
 
-The text content of each page is indexed by the Indexer class, which stores a dictionary of word frequencies to pages.
+The text content of each page is indexed by the Indexer class, which stores a dictionary of word positions to pages.
 Each page has an ID used to reference the page in the index. The index is saved to a file and can be loaded from a file.
 
-The SearchEngine class performs search queries on the index. Search queries are ranked by their each word's frequency in
-a page multiplied by the tf-idf score of the word in the query.
+The SearchEngine class performs search queries on the index. Search queries are ranked based on phrase occurrence,
+number of unique query terms and word frequency.
 
 ## Files
 
@@ -16,6 +16,22 @@ a page multiplied by the tf-idf score of the word in the query.
 - `indexer.py`: Contains the Indexer class which is responsible for indexing the text content of web pages.
 - `search_engine.py`: Contains the SearchEngine class which performs search queries on the index.
 - `search.py`: Contains the command line interface for the project.
+- `index.json`: Contains the index of the website.
+
+## Installation
+
+1. Clone the repository
+2. Install the requirements
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the CLI
+
+```bash
+python3 search.py
+```
 
 ## Usage
 
@@ -58,21 +74,7 @@ Finally, you can perform a search query by running the `find` command followed b
 - typer
 - rich
 - progress
-
-## Installation
-
-1. Clone the repository
-2. Install the requirements
-
-```bash
-pip install -r requirements.txt
-```
-
-3. Run the CLI
-
-```bash
-python3 search.py
-```
+- tabulate
 
 ## Note
 
