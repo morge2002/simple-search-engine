@@ -48,6 +48,9 @@ def load():
 @app.command(name="print")
 def print_index(search_word: str):
     """Print the index for a specific word."""
+    if not index_loaded:
+        print("Index not loaded. Use the 'load' command to load the index or the 'build' command to build a new index.")
+        return
     search_word = indexer.parse_word(search_word)
 
     if search_word not in indexer.word_index:
@@ -63,12 +66,17 @@ def print_index(search_word: str):
         output["Word Positions"].append(value)
 
     print(f"Word '{search_word}' index:")
-    print(tabulate.tabulate(output, headers="keys", showindex="always", tablefmt="simple_grid"))
+    print(
+        tabulate.tabulate(output, headers="keys", showindex=range(1, len(output["Page"]) + 1), tablefmt="simple_grid")
+    )
 
 
 @app.command(name="find")
 def find(search_phrase: str):
     """Search the index for a specific phrase."""
+    if not index_loaded:
+        print("Index not loaded. Use the 'load' command to load the index or the 'build' command to build a new index.")
+        return
     results = search_engine.search(search_phrase)
 
     output = {"Page": [], "Match Type (phrase, all_words, other)": [], "Score": [], "Matched Words": []}
@@ -80,7 +88,9 @@ def find(search_phrase: str):
         output["Matched Words"].append(len(results[page_id]["all_words"]))
 
     print(f"Top 10 results for '{search_phrase}':")
-    print(tabulate.tabulate(output, headers="keys", showindex="always", tablefmt="simple_grid"))
+    print(
+        tabulate.tabulate(output, headers="keys", showindex=range(1, len(output["Page"]) + 1), tablefmt="simple_grid")
+    )
     print("Search complete.")
 
 
