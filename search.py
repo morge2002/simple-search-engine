@@ -1,8 +1,8 @@
-import json
 import os
 import time
 
 import requests
+import tabulate
 import typer
 from rich import print
 
@@ -23,14 +23,22 @@ index_loaded = False
 
 @app.command(name="build")
 def build():
+    """Wipe the index and crawl the website to rebuild the index."""
     indexer.wipe_index()
+    global index_loaded
+    index_loaded = False
     crawler.reset_crawler()
+    print(
+        "Building index. The number of pages to crawl will increase as more pages are found. This is shown in the "
+        "progress bar."
+    )
     crawler.crawl(website_url)
     indexer.save_index()
 
 
 @app.command(name="load")
 def load():
+    """Load the index from the file."""
     indexer.load_index()
     global index_loaded
     index_loaded = True
@@ -39,6 +47,10 @@ def load():
 
 @app.command(name="print")
 def print_index(search_word: str):
+    """Print the index for a specific word."""
+    if not index_loaded:
+        print("Index not loaded. Use the 'load' command to load the index or the 'build' command to build a new index.")
+        return
     search_word = indexer.parse_word(search_word)
 
     if search_word not in indexer.word_index:
@@ -48,17 +60,39 @@ def print_index(search_word: str):
     for page_id, value in indexer.word_index[search_word].items():
         index[indexer.id_to_url[page_id]] = value
 
+    output = {"Page": [], "Word Positions": []}
+    for page_id, value in indexer.word_index[search_word].items():
+        output["Page"].append(indexer.id_to_url[page_id])
+        output["Word Positions"].append(value)
+
     print(f"Word '{search_word}' index:")
-    print(json.dumps(index, indent=2))
+    print(
+        tabulate.tabulate(output, headers="keys", showindex=range(1, len(output["Page"]) + 1), tablefmt="simple_grid")
+    )
 
 
 @app.command(name="find")
 def find(search_phrase: str):
-    search_engine.search(search_phrase)
+    """Search the index for a specific phrase."""
+    if not index_loaded:
+        print("Index not loaded. Use the 'load' command to load the index or the 'build' command to build a new index.")
+        return
+    results = search_engine.search(search_phrase)
+
+    output = {"Page": [], "Match Type (phrase, all_words, other)": []}
+    for i, page_id in enumerate(results):
+        output["Page"].append(indexer.id_to_url[page_id])
+        output["Match Type (phrase, all_words, other)"].append(results[page_id]["match_type"])
+
+    print(f"Top 10 results for '{search_phrase}':")
+    print(
+        tabulate.tabulate(output, headers="keys", showindex=range(1, len(output["Page"]) + 1), tablefmt="simple_grid")
+    )
     print("Search complete.")
 
 
 def main():
+    """Main function to run the CLI."""
     commands = ", ".join([command.name for command in app.registered_commands])
     print("\n[bold underline green]Welcome to the search engine CLI![/bold underline green]")
     while True:
@@ -70,7 +104,7 @@ def main():
             f"Index present: [underline]{os.path.exists(indexer.index_file_path)}[/underline], "
             f"Index loaded: [underline]{index_loaded}[/underline], "
             f"Website: {website_url}, "
-            f"Index size: [underline]{len(indexer.page_index)}[/underline] pages)"
+            f"Index size: [underline]{len(indexer.id_to_url)}[/underline] pages)"
             f"[/blue]"
         )
 

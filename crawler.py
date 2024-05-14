@@ -14,6 +14,7 @@ class Crawler:
     the text content of each page. The crawler will observe a politeness window to avoid overwhelming the website with
     requests.
     """
+
     webpages = set()
     requested_urls = []
 
@@ -24,9 +25,10 @@ class Crawler:
         self.politeness_window = politeness_window
         self.indexer = indexer
         self.last_request_time = 0
-        self.max_pages = float('inf')
+        self.max_pages = float("inf")
         # self.max_pages = 4
         self.fetched_pages = 0
+        self.update_max_pages = False
 
     def fetch_page_content(self, url) -> bytes | None:
         """Fetch the content of a web page."""
@@ -62,7 +64,7 @@ class Crawler:
             return
 
         # Crawl the web page
-        soup = BeautifulSoup(page_content, 'html.parser')
+        soup = BeautifulSoup(page_content, "html.parser")
 
         # Extract text content from HTML
         text = self.extract_texts(soup)
@@ -78,7 +80,7 @@ class Crawler:
 
         self.webpages.update(links)
         # print(f"{url}: Found {len(links)} unseen links")
-        if len(links):
+        if len(links) and self.update_max_pages:
             bar.max = len(self.webpages)
 
         bar.next()
@@ -92,13 +94,13 @@ class Crawler:
         """Crawl a website showing a progress bar which updates as new pages are found and crawled."""
         if website_url is None:
             website_url = self.website_url
-        with Bar('Crawling', suffix='%(index)d / %(max)d , %(elapsed_td)s', max=10) as bar:
-            crawler.__crawl(website_url, bar)
+        with Bar("Crawling", suffix="%(index)d / %(max)d , %(elapsed_td)s", max=214) as bar:
+            self.__crawl(website_url, bar)
 
     @staticmethod
     def get_page_links(soup) -> list:
         """Extract links from BeautifulSoup soup"""
-        links = [link.get('href') for link in soup.find_all('a')]
+        links = [link.get("href") for link in soup.find_all("a")]
         return links
 
     def filter_and_format_links(self, links) -> list:
