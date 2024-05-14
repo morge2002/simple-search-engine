@@ -79,13 +79,10 @@ def find(search_phrase: str):
         return
     results = search_engine.search(search_phrase)
 
-    output = {"Page": [], "Match Type (phrase, all_words, other)": [], "Score": [], "Matched Words": []}
+    output = {"Page": [], "Match Type (phrase, all_words, other)": []}
     for i, page_id in enumerate(results):
         output["Page"].append(indexer.id_to_url[page_id])
         output["Match Type (phrase, all_words, other)"].append(results[page_id]["match_type"])
-        # TODO: Remove the following line and the next line
-        output["Score"].append(results[page_id]["score"])
-        output["Matched Words"].append(len(results[page_id]["all_words"]))
 
     print(f"Top 10 results for '{search_phrase}':")
     print(
